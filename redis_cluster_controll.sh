@@ -3,7 +3,7 @@
 # SETSLOTS 构建slot
 # ADDNODE  添加节点
 # REMOVENODE 删除节点
-# MERGESLOTS 迁移slot          
+# MERGESLOTS 迁移slot
 # info 集群查询
 # node 节点查询
 # REPLICATE 从节点调整
@@ -24,9 +24,9 @@ function setmap(){
              split(x[1],y,":")  ;\
              print $1 , y[1],y[2]}
            '\
-    | while read line 
-      do  
-        echo   ${line#* }> /tmp/${PID}/${line%% *}  
+    | while read line
+      do
+        echo   ${line#* }> /tmp/${PID}/${line%% *}
       done
 
     }
@@ -85,10 +85,10 @@ function REMOVENODE(){
     _nodeid=$1
     for node in `nodes \
                  | grep -v ${_nodeid} \
-                 | awk '{print $1}' ` 
+                 | awk '{print $1}' `
     do
         specConn1 ${node}
-        timeout 5 ${sCMD1} cluster  forget ${_nodeid} 
+        timeout 5 ${sCMD1} cluster  forget ${_nodeid}
     done
 
 }
@@ -103,7 +103,7 @@ function SETSLOTS(){
     start=$1
     end=$2
     nodeID=$3
-    
+
     for slot in `seq ${start} ${end}`
     do
         echo "slot:${slot}"
@@ -119,7 +119,7 @@ function countslotkeys(){
     else
         echo "$$x"
     fi
-    
+
 }
 gkey=""
 function MERGEKEYS(){
@@ -169,21 +169,21 @@ function MERGESLOTS(){
                 ${sCMD1} cluster setslot ${slot} mirgrating ${fromNode} \
                 || ${sCMD2} cluster setslot ${slot} stable  \
             ) \
-            || ${sCMD2} cluster setslot ${slot} stable  
+            || ${sCMD2} cluster setslot ${slot} stable
 
 
-        # ${sCMD1} CLUSTER  GETKEYSINSLOT ${slot} 100 
+        # ${sCMD1} CLUSTER  GETKEYSINSLOT ${slot} 100
         while [[ $(countslotkeys $slot) != $$x ]]; do
             MERGEKEYS "${sCMD1}" "${slot}" "${toNode}"
             #statements
         done
-        
 
-        ${sCMD1} cluster setslot ${slot} node ${toNode} ; 
+
+        ${sCMD1} cluster setslot ${slot} node ${toNode} ;
         ${sCMD2} cluster setslot ${slot} node ${toNode} ;
-        
 
-        #${sCMD1} cluster setslot ${slot} stable  
+
+        #${sCMD1} cluster setslot ${slot} stable
 
 
     done
@@ -193,13 +193,13 @@ function REPLICATE(){
     _slave=$1
     _master=$2
     specConn1 ${_slave}
-    ${sCMD1} cluster REPLICATE ${_master} 
+    ${sCMD1} cluster REPLICATE ${_master}
 }
 
 connect ${PORT}
 
 case ${COMMAMD} in
-    info)        
+    info)
         info
     ;;
     nodes)
@@ -236,35 +236,35 @@ case ${COMMAMD} in
     ;;
     *)
     echo @! $@
-    info 
-    echo "###slave###"        
+    info
+    echo "###slave###"
     nodes | grep slave
-    echo "###master###"      
-    nodes  | grep master              
-    echo "######" 
+    echo "###master###"
+    nodes  | grep master
+    echo "######"
 
     echo "帮助信息"
     echo """
-# 构建slot: SETSLOTS start end nodeID 
+# 构建slot: SETSLOTS start end nodeID
     eg: $0 ${PORT} SETSLOTS 0 5461 f0b281d833d357fe5137805afad18e5355c5e7b7
-        @! ${PORT} SETSLOTS 5462 10922 2f3391d3982bb8f385ba4a64da073e4931b5a72b 
+        @! ${PORT} SETSLOTS 5462 10922 2f3391d3982bb8f385ba4a64da073e4931b5a72b
         @! ${PORT} SETSLOTS 10923 16383 620f68d978402da92f368797ea743f07f76a7961
 # 添加节点: ADDNODE ip port
     eg: $0 ${PORT} ADDNODE a.b.c.d port
 # 删除节点: REMOVENODE NODEID
-    eg: $0 ${PORT} REMOVENODE 31c5368da4827d33082a44f95ff88abb92e95078 
+    eg: $0 ${PORT} REMOVENODE 31c5368da4827d33082a44f95ff88abb92e95078
 # 迁移slot: MERGESLOTS start end fromNode toNode
     eg: $0 ${PORT} MERGESLOTS 1 3 2f3391d3982bb8f385ba4a64da073e4931b5a72b 620f68d978402da92f368797ea743f07f76a7961
 # 从节点调整: REPLICATE slave master
     eg: $0 ${PORT}  REPLICATE 620f68d978402da92f368797ea743f07f76a7961 1d4e803b8218b83a5f426c3cc913cbf38f22ac85
-# 集群查询: info 
+# 集群查询: info
     eg: $0 ${PORT} info
-# 节点查询: node 
+# 节点查询: node
     eg: $0 ${PORT} node
 
     """
     ;;
 
-esac 
+esac
 
 cleantemp
