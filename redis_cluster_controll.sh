@@ -209,7 +209,8 @@ case ${COMMAMD} in
         NODEID=$3
         cleanErrNode
         REMOVENODE ${NODEID}
-
+        sleep 5
+        cleanErrNode
     ;;
     SETSLOTS)
         start=$3
@@ -247,8 +248,8 @@ case ${COMMAMD} in
     echo """
 # 构建slot: SETSLOTS start end nodeID
     eg: $0 ${PORT} SETSLOTS 0 5461 f0b281d833d357fe5137805afad18e5355c5e7b7
-        @! ${PORT} SETSLOTS 5462 10922 2f3391d3982bb8f385ba4a64da073e4931b5a72b
-        @! ${PORT} SETSLOTS 10923 16383 620f68d978402da92f368797ea743f07f76a7961
+        $0 ${PORT} SETSLOTS 5462 10922 2f3391d3982bb8f385ba4a64da073e4931b5a72b
+        $0 ${PORT} SETSLOTS 10923 16383 620f68d978402da92f368797ea743f07f76a7961
 # 添加节点: ADDNODE ip port
     eg: $0 ${PORT} ADDNODE a.b.c.d port
 # 删除节点: REMOVENODE NODEID
